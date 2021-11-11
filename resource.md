@@ -24,6 +24,10 @@ sidebarDepth: 0
 {{/each}}
 {{/if}}
 
+{{#if (eq type "string")}}Type: {{ type }}{{/if}}
+
+{{#if enum }}Enum: <ul>{{#each enum }}<li>`{{ this }}`</li>{{/each}}</ul>{{/if}}
+
 {{#if example }}
 ##### Example
 ```json
