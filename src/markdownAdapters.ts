@@ -7,7 +7,7 @@ import {
     Resource,
     ResponseSchema,
 } from './types'
-import { find, flatten, groupBy, isNil, sortBy } from 'ramda'
+import { find, flatten, groupBy, isNil, omit, sortBy } from 'ramda'
 import { readFileSync, writeFileSync } from 'fs'
 import { OpenAPIV3 } from 'openapi-types'
 
@@ -29,7 +29,6 @@ function mergeSchemaObjects(...schemaObjects: OpenAPIV3.SchemaObject[]): OpenAPI
     return schemaObjects.reduce(
         (currSchemaObject, schemaObject: OpenAPIV3.SchemaObject): OpenAPIV3.SchemaObject => {
             return {
-                description: currSchemaObject.description ?? schemaObject.description,
                 ...currSchemaObject,
                 ...schemaObject,
                 properties: {
@@ -53,6 +52,7 @@ function resolveAllOf(
         return schemaObject
     }
     return mergeSchemaObjects(
+        omit(['allOf'], schemaObject) as OpenAPIV3.SchemaObject,
         ...(schemaObject.allOf as OpenAPIV3.SchemaObject[]).map(
             (childSchemaObject: OpenAPIV3.SchemaObject): OpenAPIV3.SchemaObject => {
                 return resolveSchemaOrReferenceObject(

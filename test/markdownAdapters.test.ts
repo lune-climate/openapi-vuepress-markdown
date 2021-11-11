@@ -257,6 +257,68 @@ describe('markdownAdapters', () => {
                 },
             })
         })
+
+        test('should include fields at the same level of the allOf clause', () => {
+            const schemaObject = resolveAllOf(
+                {
+                    title: 'Title',
+                    description: 'Description',
+                    allOf: [
+                        {
+                            type: 'object',
+                            required: ['a', 'b'],
+                            properties: {
+                                a: {
+                                    type: 'string',
+                                    pattern: '^[0-9]+$',
+                                    example: '1045',
+                                },
+                                b: {
+                                    type: 'string',
+                                    description: 'foo',
+                                    enum: ['enum1', 'enum2'],
+                                },
+                            },
+                        },
+                        {
+                            type: 'object',
+                            properties: {
+                                c: {
+                                    type: 'string',
+                                    example: 'bar',
+                                },
+                            },
+                        },
+                    ],
+                },
+                createIRefsMock(),
+                undefined,
+                0,
+            )
+
+            expect(schemaObject).toEqual({
+                title: 'Title',
+                description: 'Description',
+                type: 'object',
+                required: ['a', 'b'],
+                properties: {
+                    a: {
+                        type: 'string',
+                        pattern: '^[0-9]+$',
+                        example: '1045',
+                    },
+                    b: {
+                        type: 'string',
+                        description: 'foo',
+                        enum: ['enum1', 'enum2'],
+                    },
+                    c: {
+                        type: 'string',
+                        example: 'bar',
+                    },
+                },
+            })
+        })
     })
 
     describe('resolveProperties', () => {
