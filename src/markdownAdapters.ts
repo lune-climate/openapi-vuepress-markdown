@@ -285,7 +285,7 @@ function requestBodyObjects(
     const schemaObject = object as OpenAPIV3.SchemaObject
 
     return {
-        requestBodySchema: resolveSchemaOrReferenceObject(schemaObject, refs, 1),
+        requestBodySchema: resolveSchemaOrReferenceObject(schemaObject, refs, 2),
         requestBodyExample: buildExampleTree(schemaObject, refs),
         requestBodyRef: refObject.$ref,
     }
