@@ -2,10 +2,13 @@
   "name": "openapi-vuepress-markdown",
   "version": "0.0.1",
   "description": "This package generates vuepress compatible markdown from an openapi schema",
-  "main": "index.js",
+  "main": "./dist/openapi-vuepress-markdown.js",
   "repository": "https://github.com/lune-climate/openapi-vuepress-markdown.git",
   "author": "Lune Climate",
   "license": "MIT",
+  "bin": {
+    "openapi-vuepress-markdown": "./dist/openapi-vuepress-markdown.js"
+  },
   "scripts": {
     "prettier": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "yarn run eslint \"src/**/*.ts\" \"test/**/*.ts\"",
