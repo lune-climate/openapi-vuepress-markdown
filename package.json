@@ -12,6 +12,7 @@
     "fix": "yarn run eslint --fix \"src/**/*.ts\" \"test/**/*.ts\" && prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "build": "tsc -p tsconfig.json",
     "dev": "yarn run ts-node src/openapi-vuepress-markdown.ts",
+    "pretest": "tsc -p tsconfig.json",
     "test": "jest"
   },
   "dependencies": {
