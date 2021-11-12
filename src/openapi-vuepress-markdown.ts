@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import './handlebarHelpers'
 import { Command } from 'commander'
 import { generateMarkdownFiles } from './markdownAdapters'

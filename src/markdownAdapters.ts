@@ -415,7 +415,7 @@ export function generateMarkdownFiles(
 }
 
 function generateEndpointsMarkdownFile(data: MarkdownTemplateData, outputDirectory?: string) {
-    const templateContent = readFileSync('endpoints.md')
+    const templateContent = readFileSync(path.join(__dirname, '/../endpoints.md'))
     const template = Handlebars.compile(templateContent.toString())
 
     const result = template(data)
@@ -437,7 +437,7 @@ function generateEndpointsMarkdownFile(data: MarkdownTemplateData, outputDirecto
 }
 
 function generateResourceMarkdownFile(resource: Resource, outputDirectory?: string) {
-    const templateContent = readFileSync('resource.md')
+    const templateContent = readFileSync(path.join(__dirname, '/../resource.md'))
     const template = Handlebars.compile(templateContent.toString())
 
     const result = template(resource)

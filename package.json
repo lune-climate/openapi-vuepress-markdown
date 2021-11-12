@@ -1,11 +1,14 @@
 {
   "name": "openapi-vuepress-markdown",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "This package generates vuepress compatible markdown from an openapi schema",
-  "main": "index.js",
+  "main": "./dist/openapi-vuepress-markdown.js",
   "repository": "https://github.com/lune-climate/openapi-vuepress-markdown.git",
   "author": "Lune Climate",
   "license": "MIT",
+  "bin": {
+    "openapi-vuepress-markdown": "./dist/openapi-vuepress-markdown.js"
+  },
   "scripts": {
     "prettier": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "yarn run eslint \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -20,7 +23,8 @@
     "deepcopy": "^2.1.0",
     "handlebars": "^4.7.7",
     "ramda": "^0.27.1",
-    "swagger-parser": "^10.0.3"
+    "swagger-parser": "^10.0.3",
+    "openapi-types": "^9.3.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
@@ -37,7 +41,6 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "jest": "^27.3.1",
-    "openapi-types": "^9.3.0",
     "prettier": "^2.4.1",
     "rewire": "^5.0.0",
     "ts-jest": "^27.0.7",
