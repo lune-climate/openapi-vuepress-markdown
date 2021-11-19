@@ -29,6 +29,14 @@ describe('markdownAdapters', () => {
         depth: number | undefined,
         depthCounter: number,
     ) => OpenAPIV3.SchemaObject
+    let requestBodyObjects: (
+        opObject: Readonly<OpenAPIV3.OperationObject>,
+        refs: IRefs,
+    ) => {
+        requestBodySchema?: OpenAPIV3.SchemaObject
+        requestBodyExample?: any
+        requestBodyRef?: string
+    }
 
     beforeAll(() => {
         // access non-exported functions
@@ -36,6 +44,7 @@ describe('markdownAdapters', () => {
         resolveAllOf = markdownAdapters.__get__('resolveAllOf')
         resolveProperties = markdownAdapters.__get__('resolveProperties')
         resolveSchemaOrReferenceObject = markdownAdapters.__get__('resolveSchemaOrReferenceObject')
+        requestBodyObjects = markdownAdapters.__get__('requestBodyObjects')
     })
 
     test('mergeSchemaObjects should merge all schemaObject fields', () => {
@@ -647,6 +656,165 @@ describe('markdownAdapters', () => {
                                 example: 10,
                             },
                         },
+                    },
+                },
+            })
+        })
+    })
+
+    describe('requestBodyObjects', () => {
+        test('should expand the schema two levels', () => {
+            const refsMock = createIRefsMock()
+            refsMock.get.mockReturnValue({
+                type: 'object',
+                properties: {
+                    c: {
+                        type: 'string',
+                        example: 'bar',
+                    },
+                },
+            })
+
+            const opObject = {
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                required: ['a', 'b'],
+                                properties: {
+                                    a: {
+                                        type: 'string',
+                                        pattern: '^[0-9]+$',
+                                        example: '1045',
+                                    },
+                                    b: { $ref: '#/Something' },
+                                },
+                            },
+                        },
+                    },
+                },
+            } as unknown as OpenAPIV3.OperationObject
+
+            const requestObjects = requestBodyObjects(opObject, refsMock)
+
+            expect(refsMock.get).toHaveBeenCalledWith('#/Something')
+            expect(requestObjects.requestBodyRef).toBeUndefined()
+            expect(requestObjects.requestBodySchema).toEqual({
+                type: 'object',
+                required: ['a', 'b'],
+                properties: {
+                    a: {
+                        type: 'string',
+                        pattern: '^[0-9]+$',
+                        example: '1045',
+                    },
+                    b: {
+                        type: 'object',
+                        properties: {
+                            c: {
+                                type: 'string',
+                                example: 'bar',
+                            },
+                        },
+                    },
+                },
+            })
+            expect(requestObjects.requestBodyExample).toEqual({
+                a: '1045',
+                b: {
+                    c: 'bar',
+                },
+            })
+        })
+
+        test('should expand the schema two levels and not beyond', () => {
+            const refsMock = createIRefsMock()
+            refsMock.get.mockImplementation((ref: string) => {
+                switch (ref) {
+                    case '#/Something':
+                        return {
+                            type: 'object',
+                            properties: {
+                                c: {
+                                    type: 'string',
+                                    example: 'bar',
+                                },
+                                d: { $ref: '#/SomethingElse' },
+                            },
+                        }
+                    case '#/SomethingElse':
+                        return {
+                            type: 'object',
+                            properties: {
+                                a: {
+                                    type: 'string',
+                                    example: 'foo',
+                                },
+                                b: { $ref: '#/SomethingElseAgain' },
+                            },
+                        }
+                    default:
+                        return {
+                            type: 'number',
+                            example: 10,
+                        }
+                }
+            })
+
+            const opObject = {
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                required: ['a', 'b'],
+                                properties: {
+                                    a: {
+                                        type: 'string',
+                                        pattern: '^[0-9]+$',
+                                        example: '1045',
+                                    },
+                                    b: { $ref: '#/Something' },
+                                },
+                            },
+                        },
+                    },
+                },
+            } as unknown as OpenAPIV3.OperationObject
+
+            const requestObjects = requestBodyObjects(opObject, refsMock)
+
+            expect(refsMock.get).toHaveBeenCalledWith('#/Something')
+            expect(requestObjects.requestBodyRef).toBeUndefined()
+            expect(requestObjects.requestBodySchema).toEqual({
+                type: 'object',
+                required: ['a', 'b'],
+                properties: {
+                    a: {
+                        type: 'string',
+                        pattern: '^[0-9]+$',
+                        example: '1045',
+                    },
+                    b: {
+                        type: 'object',
+                        properties: {
+                            c: {
+                                type: 'string',
+                                example: 'bar',
+                            },
+                            d: { $ref: '#/SomethingElse' },
+                        },
+                    },
+                },
+            })
+            expect(requestObjects.requestBodyExample).toEqual({
+                a: '1045',
+                b: {
+                    c: 'bar',
+                    d: {
+                        a: 'foo',
+                        b: 10,
                     },
                 },
             })
