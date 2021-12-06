@@ -394,7 +394,8 @@ function generateResource(
 export function generateMarkdownFiles(
     api: OpenAPIV3.Document,
     refs: IRefs,
-    outputDirectory?: string,
+    endpointsDirectory?: string,
+    resourcesDirectory?: string,
 ) {
     // resources
     const schemas = api.components?.schemas as Record<string, OpenAPIV3.SchemaObject> | undefined
@@ -404,13 +405,15 @@ export function generateMarkdownFiles(
             return generateResource(name, schemaObject, refs)
         },
     )
-    resources.map((resource: Resource) => generateResourceMarkdownFile(resource, outputDirectory))
+    resources.map((resource: Resource) =>
+        generateResourceMarkdownFile(resource, resourcesDirectory),
+    )
 
     // endpoints
     const endpoints = generateEndpoints(api, refs)
     const markdownTemplatesData = groupEndpointsByTag(api, endpoints)
     markdownTemplatesData.map((markdownTemplateData) =>
-        generateEndpointsMarkdownFile(markdownTemplateData, outputDirectory),
+        generateEndpointsMarkdownFile(markdownTemplateData, endpointsDirectory),
     )
 }
 
