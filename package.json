@@ -1,6 +1,6 @@
 {
   "name": "openapi-vuepress-markdown",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "description": "This package generates vuepress compatible markdown from an openapi schema",
   "main": "./dist/openapi-vuepress-markdown.js",
   "repository": "https://github.com/lune-climate/openapi-vuepress-markdown.git",

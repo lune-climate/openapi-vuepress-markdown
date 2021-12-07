@@ -13,18 +13,22 @@ async function main(): Promise<void> {
             '-o, --output-directory <output-directory>',
             'Output destination directory. If not specified, then the output is redirected to standard output',
         )
+        .option(
+            '-e, --endpoints-prefix <endpoints-prefix>',
+            'Endpoint file prefix, to avoid filename conflicts with resources. Defaults to blank (no prefix)',
+        )
         .parse()
         .parse()
 
     const options = program.opts()
-    const { schema, outputDirectory } = options
+    const { schema, outputDirectory, endpointsPrefix } = options
 
     const parser = new SwaggerParser()
     // let it throw
     const api = await parser.bundle(schema)
     const refs = parser.$refs
 
-    generateMarkdownFiles(api, refs, outputDirectory)
+    generateMarkdownFiles(api, refs, outputDirectory, endpointsPrefix)
 }
 
 // eslint-disable-next-line no-extra-semi
