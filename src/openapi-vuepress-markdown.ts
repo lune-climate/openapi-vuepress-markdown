@@ -10,25 +10,21 @@ async function main(): Promise<void> {
     program
         .requiredOption('-s, --schema <schema>', 'OpenAPI spec in json or yml format')
         .option(
-            '-e, --endpoints-directory <endpoints-directory>',
-            'Endpoints destination directory. If not specified, then the output is redirected to standard output',
-        )
-        .option(
-            '-r, --resources-directory <resources-directory>',
-            'Resources destination directory. If not specified, then the output is redirected to standard output',
+            '-o, --output-directory <output-directory>',
+            'Output destination directory. If not specified, then the output is redirected to standard output',
         )
         .parse()
         .parse()
 
     const options = program.opts()
-    const { schema, endpointsDirectory, resourcesDirectory } = options
+    const { schema, outputDirectory } = options
 
     const parser = new SwaggerParser()
     // let it throw
     const api = await parser.bundle(schema)
     const refs = parser.$refs
 
-    generateMarkdownFiles(api, refs, endpointsDirectory, resourcesDirectory)
+    generateMarkdownFiles(api, refs, outputDirectory)
 }
 
 // eslint-disable-next-line no-extra-semi
