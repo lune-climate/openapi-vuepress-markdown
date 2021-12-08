@@ -394,8 +394,8 @@ function generateResource(
 export function generateMarkdownFiles(
     api: OpenAPIV3.Document,
     refs: IRefs,
-    endpointsDirectory?: string,
-    resourcesDirectory?: string,
+    outputDirectory?: string,
+    endpointsPrefix?: string,
 ) {
     // resources
     const schemas = api.components?.schemas as Record<string, OpenAPIV3.SchemaObject> | undefined
@@ -405,19 +405,21 @@ export function generateMarkdownFiles(
             return generateResource(name, schemaObject, refs)
         },
     )
-    resources.map((resource: Resource) =>
-        generateResourceMarkdownFile(resource, resourcesDirectory),
-    )
+    resources.map((resource: Resource) => generateResourceMarkdownFile(resource, outputDirectory))
 
     // endpoints
     const endpoints = generateEndpoints(api, refs)
     const markdownTemplatesData = groupEndpointsByTag(api, endpoints)
     markdownTemplatesData.map((markdownTemplateData) =>
-        generateEndpointsMarkdownFile(markdownTemplateData, endpointsDirectory),
+        generateEndpointsMarkdownFile(markdownTemplateData, outputDirectory, endpointsPrefix),
     )
 }
 
-function generateEndpointsMarkdownFile(data: MarkdownTemplateData, outputDirectory?: string) {
+function generateEndpointsMarkdownFile(
+    data: MarkdownTemplateData,
+    outputDirectory?: string,
+    endpointsPrefix?: string,
+) {
     const templateContent = readFileSync(path.join(__dirname, '/../endpoints.md'))
     const template = Handlebars.compile(templateContent.toString())
 
@@ -430,7 +432,7 @@ function generateEndpointsMarkdownFile(data: MarkdownTemplateData, outputDirecto
                 .replace(/\s\s+/g, ' ')
                 .replace(/\s/g, '-')
                 .toLowerCase() + '.md'
-        const file = path.join(outputDirectory!, filename)
+        const file = path.join(outputDirectory!, `${endpointsPrefix ?? ''}${filename}`)
         writeFileSync(file, result)
         console.log(`Endpoint saved: ${file}`)
         return
