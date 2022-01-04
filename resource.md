@@ -10,7 +10,11 @@ sidebarDepth: 0
 {{/inline}}
 
 {{#*inline "row" key property required }}
-| {{ key }} | {{ property.type }}{{> typeDetails key=key property=property required=required}} | {{{ breaklines property.description }}} |
+### {{ key }}
+
+Type: {{ property.type }}{{> typeDetails key=key property=property required=required}}
+
+{{{ breaklines property.description }}}
 {{/inline}}
 
 ## {{ name }}
@@ -18,8 +22,6 @@ sidebarDepth: 0
 {{{ description }}}
 
 {{#if properties}}
-| Field | Type | Description |
-| ----- | ---- | ------------|
 {{#each properties}}
 {{> row key=@key property=this required=../required}}
 {{/each}}
