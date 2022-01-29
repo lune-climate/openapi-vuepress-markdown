@@ -385,7 +385,6 @@ function generateEndpoint(
         tags: opObject.tags!,
         ...requestBodyObjects(opObject, refs, depth),
         ...(pathParameters ? { pathParameters } : {}),
-        responses: responseObjects(opObject, refs),
         responses: responseObjects(opObject, refs, depth),
     }
 }
