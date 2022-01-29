@@ -32,6 +32,7 @@ describe('markdownAdapters', () => {
     let requestBodyObjects: (
         opObject: Readonly<OpenAPIV3.OperationObject>,
         refs: IRefs,
+        depth: number | undefined,
     ) => {
         requestBodySchema?: OpenAPIV3.SchemaObject
         requestBodyExample?: any
@@ -696,7 +697,7 @@ describe('markdownAdapters', () => {
                 },
             } as unknown as OpenAPIV3.OperationObject
 
-            const requestObjects = requestBodyObjects(opObject, refsMock)
+            const requestObjects = requestBodyObjects(opObject, refsMock, undefined)
 
             expect(refsMock.get).toHaveBeenCalledWith('#/Something')
             expect(requestObjects.requestBodyRef).toBeUndefined()
@@ -783,7 +784,7 @@ describe('markdownAdapters', () => {
                 },
             } as unknown as OpenAPIV3.OperationObject
 
-            const requestObjects = requestBodyObjects(opObject, refsMock)
+            const requestObjects = requestBodyObjects(opObject, refsMock, 2)
 
             expect(refsMock.get).toHaveBeenCalledWith('#/Something')
             expect(requestObjects.requestBodyRef).toBeUndefined()
