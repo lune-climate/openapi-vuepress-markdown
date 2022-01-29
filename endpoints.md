@@ -56,6 +56,15 @@ Array of:
 {{/each}}
 {{/if}}
 
+{{#if this.queryParameters}}
+#### Query Parameters
+| Field | Type | Description | Example |
+| ----- | ---- | -------- | ----------- | ------- |
+{{#each this.queryParameters}}
+| {{ this.name }} | {{ this.schema.type }} {{#if this.required }}<br />_**required**_{{/if}} | {{{ breaklines this.description }}} | {{ this.schema.example }} |
+{{/each}}
+{{/if}}
+
 {{#if this.requestBodySchema }}
 #### Request Body{{#if this.requestBodyRef }} [{{ refToResourceName this.requestBodyRef }}]({{ refToResourceLink this.requestBodyRef }}){{/if}}:
 {{> schemaMarkdown schema=this.requestBodySchema example=this.requestBodyExample }}

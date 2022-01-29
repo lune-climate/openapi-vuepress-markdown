@@ -18,6 +18,7 @@ export interface Endpoint {
     requestBodyRef?: string
     requestBodyExample?: any
     pathParameters?: OpenAPIV3.ParameterObject[]
+    queryParameters?: OpenAPIV3.ParameterObject[]
     responses: Record<string, ResponseSchema>
 }
 
