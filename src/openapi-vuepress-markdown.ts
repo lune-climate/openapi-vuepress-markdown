@@ -27,11 +27,11 @@ async function main(): Promise<void> {
         )
         .option(
             '-ed, --endpoint-schema-depth <endpoint-schema-depth>',
-            'Endpoint schema parse depth. Defaults prefix to 2',
+            'Endpoint schema parse depth. Defaults prefix to infinity',
         )
         .option(
             '-rd, --resource-schema-depth <resource-schema-depth>',
-            'Resource schema parse depth. Defaults prefix to 2',
+            'Resource schema parse depth. Defaults prefix to infinity',
         )
         .parse()
 

@@ -415,13 +415,13 @@ export function generateMarkdownFiles(
     const resources = sortBy((name: string) => name, Object.keys(schemas ?? {})).map(
         (name: string): Resource => {
             const schemaObject = schemas![name]
-            return generateResource(name, schemaObject, refs, resourceSchemaDepth ?? 2)
+            return generateResource(name, schemaObject, refs, resourceSchemaDepth)
         },
     )
     resources.map((resource: Resource) => generateResourceMarkdownFile(resource, outputDirectory))
 
     // endpoints
-    const endpoints = generateEndpoints(api, refs, endpointsSchemaDepth ?? 2)
+    const endpoints = generateEndpoints(api, refs, endpointsSchemaDepth)
     const markdownTemplatesData = groupEndpointsByTag(api, endpoints)
     markdownTemplatesData.map((markdownTemplateData) =>
         generateEndpointsMarkdownFile(markdownTemplateData, outputDirectory, endpointsPrefix),
