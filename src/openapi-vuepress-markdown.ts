@@ -18,11 +18,11 @@ async function main(): Promise<void> {
             'Endpoint file prefix, to avoid filename conflicts with resources. Defaults to blank (no prefix)',
         )
         .option(
-            '-et, --endpoints-template <endpoints-template>',
+            '-E, --endpoints-template <endpoints-template>',
             'Endpoints template file. Defaults to ./endpoints.md',
         )
         .option(
-            '-rt, --resource-template <resource-template>',
+            '-R, --resource-template <resource-template>',
             'Resource template file. Defaults to ./resource.md',
         )
         .parse()
