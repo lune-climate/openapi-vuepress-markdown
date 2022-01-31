@@ -1,8 +1,10 @@
 import { OpenAPIV3 } from 'openapi-types'
 
+type SchemaObjectWithRef = OpenAPIV3.SchemaObject & { ref?: string }
+
 export type ResponseSchema = {
     description?: string
-    schema?: OpenAPIV3.SchemaObject
+    schema?: SchemaObjectWithRef
     ref?: string
     example?: any
 }
@@ -14,7 +16,7 @@ export interface Endpoint {
     tags: string[]
     summary?: string
     description?: string
-    requestBodySchema?: OpenAPIV3.SchemaObject
+    requestBodySchema?: SchemaObjectWithRef
     requestBodyRef?: string
     requestBodyExample?: any
     pathParameters?: OpenAPIV3.ParameterObject[]
@@ -27,8 +29,8 @@ export interface MarkdownTemplateData {
     endpoints: Endpoint[]
 }
 
-export type Properties = Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>
-export type Resource = { name: string; example?: any } & OpenAPIV3.SchemaObject
+export type Properties = Record<string, SchemaObjectWithRef | OpenAPIV3.ReferenceObject>
+export type Resource = { name: string; example?: any } & SchemaObjectWithRef
 
 export interface IRefs {
     // any: not great, https://github.com/APIDevTools/swagger-parser/blob/main/lib/index.d.ts#L428

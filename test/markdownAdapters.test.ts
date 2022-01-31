@@ -206,6 +206,7 @@ describe('markdownAdapters', () => {
             expect(refsMock.get).toHaveBeenCalledWith('#/Something')
             expect(schemaObject).toEqual({
                 type: 'object',
+                ref: '#/Something',
                 required: ['a', 'b'],
                 properties: {
                     a: {
@@ -409,6 +410,7 @@ describe('markdownAdapters', () => {
                 },
                 c: {
                     type: 'object',
+                    ref: '#/Something',
                     properties: {
                         z: {
                             type: 'string',
@@ -443,6 +445,7 @@ describe('markdownAdapters', () => {
             expect(refsMock.get).toHaveBeenCalledWith('#/Something')
             expect(schemaObject).toEqual({
                 type: 'object',
+                ref: '#/Something',
                 properties: {
                     c: {
                         type: 'string',
@@ -490,6 +493,7 @@ describe('markdownAdapters', () => {
                     },
                     a: {
                         type: 'object',
+                        ref: '#/Something',
                         properties: {
                             c: {
                                 type: 'string',
@@ -543,6 +547,7 @@ describe('markdownAdapters', () => {
                             example: 'bar',
                         },
                         a: {
+                            ref: '#/Something',
                             type: 'object',
                             properties: {
                                 c: {
@@ -583,6 +588,7 @@ describe('markdownAdapters', () => {
                 type: 'array',
                 items: {
                     type: 'object',
+                    ref: '#/Something',
                     properties: {
                         c: {
                             type: 'string',
@@ -639,6 +645,7 @@ describe('markdownAdapters', () => {
             expect(refsMock.get).toHaveBeenNthCalledWith(3, '#/SomethingElseAgain')
             expect(schemaObject).toEqual({
                 type: 'object',
+                ref: '#/Something',
                 properties: {
                     c: {
                         type: 'string',
@@ -646,6 +653,7 @@ describe('markdownAdapters', () => {
                     },
                     d: {
                         type: 'object',
+                        ref: '#/SomethingElse',
                         properties: {
                             a: {
                                 type: 'string',
@@ -654,6 +662,7 @@ describe('markdownAdapters', () => {
                             b: {
                                 type: 'number',
                                 example: 10,
+                                ref: '#/SomethingElseAgain',
                             },
                         },
                     },
@@ -711,6 +720,7 @@ describe('markdownAdapters', () => {
                     },
                     b: {
                         type: 'object',
+                        ref: '#/Something',
                         properties: {
                             c: {
                                 type: 'string',
@@ -798,6 +808,7 @@ describe('markdownAdapters', () => {
                     },
                     b: {
                         type: 'object',
+                        ref: '#/Something',
                         properties: {
                             c: {
                                 type: 'string',

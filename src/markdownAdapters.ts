@@ -155,13 +155,15 @@ function resolveExampleAdditionalProperties(
 function resolveRef(
     schemaOrRefObject: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
     refs: IRefs,
-): OpenAPIV3.SchemaObject {
+): OpenAPIV3.SchemaObject & { ref?: string } {
     const refObject = schemaOrRefObject as OpenAPIV3.ReferenceObject
     if (!refObject.$ref) {
         return deepcopy(schemaOrRefObject as OpenAPIV3.SchemaObject) // make a deepcopy for safety
     }
     const schemaObject = refs.get(refObject.$ref) as OpenAPIV3.SchemaObject
-    return deepcopy(schemaObject) // make a deep copy for safety
+
+    // keep reference in `ref` property if it has been resolved
+    return deepcopy({ ...schemaObject, ref: refObject.$ref }) // make a deep copy for safety
 }
 
 function resolveSchemaOrReferenceObject(
