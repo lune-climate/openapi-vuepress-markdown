@@ -398,12 +398,21 @@ function generateResource(
     }
 }
 
-export function generateMarkdownFiles(
-    api: OpenAPIV3.Document,
-    refs: IRefs,
-    outputDirectory?: string,
-    endpointsPrefix?: string,
-) {
+export function generateMarkdownFiles({
+    api,
+    refs,
+    outputDirectory,
+    endpointsPrefix,
+    endpointsTemplate,
+    resourceTemplate,
+}: {
+    api: OpenAPIV3.Document
+    refs: IRefs
+    outputDirectory?: string
+    endpointsPrefix?: string
+    endpointsTemplate?: string
+    resourceTemplate?: string
+}) {
     // resources
     const schemas = api.components?.schemas as Record<string, OpenAPIV3.SchemaObject> | undefined
     const resources = sortBy((name: string) => name, Object.keys(schemas ?? {})).map(
@@ -412,13 +421,20 @@ export function generateMarkdownFiles(
             return generateResource(name, schemaObject, refs)
         },
     )
-    resources.map((resource: Resource) => generateResourceMarkdownFile(resource, outputDirectory))
+    resources.map((resource: Resource) =>
+        generateResourceMarkdownFile(resource, outputDirectory, resourceTemplate),
+    )
 
     // endpoints
     const endpoints = generateEndpoints(api, refs)
     const markdownTemplatesData = groupEndpointsByTag(api, endpoints)
     markdownTemplatesData.map((markdownTemplateData) =>
-        generateEndpointsMarkdownFile(markdownTemplateData, outputDirectory, endpointsPrefix),
+        generateEndpointsMarkdownFile(
+            markdownTemplateData,
+            outputDirectory,
+            endpointsPrefix,
+            endpointsTemplate,
+        ),
     )
 }
 
@@ -426,8 +442,10 @@ function generateEndpointsMarkdownFile(
     data: MarkdownTemplateData,
     outputDirectory?: string,
     endpointsPrefix?: string,
+    endpointsTemplate?: string,
 ) {
-    const templateContent = readFileSync(path.join(__dirname, '/../endpoints.md'))
+    const file = endpointsTemplate ?? path.join(__dirname, `/../endpoints.md`)
+    const templateContent = readFileSync(file)
     const template = Handlebars.compile(templateContent.toString())
 
     const result = template(data)
@@ -448,8 +466,13 @@ function generateEndpointsMarkdownFile(
     console.log(result)
 }
 
-function generateResourceMarkdownFile(resource: Resource, outputDirectory?: string) {
-    const templateContent = readFileSync(path.join(__dirname, '/../resource.md'))
+function generateResourceMarkdownFile(
+    resource: Resource,
+    outputDirectory?: string,
+    resourceTemplate?: string,
+) {
+    const file = resourceTemplate ?? path.join(__dirname, `/../resource.md`)
+    const templateContent = readFileSync(file)
     const template = Handlebars.compile(templateContent.toString())
 
     const result = template(resource)

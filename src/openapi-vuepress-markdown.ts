@@ -17,18 +17,33 @@ async function main(): Promise<void> {
             '-e, --endpoints-prefix <endpoints-prefix>',
             'Endpoint file prefix, to avoid filename conflicts with resources. Defaults to blank (no prefix)',
         )
-        .parse()
+        .option(
+            '-E, --endpoints-template <endpoints-template>',
+            'Endpoints template file. Defaults to ./endpoints.md',
+        )
+        .option(
+            '-R, --resource-template <resource-template>',
+            'Resource template file. Defaults to ./resource.md',
+        )
         .parse()
 
     const options = program.opts()
-    const { schema, outputDirectory, endpointsPrefix } = options
+    const { schema, outputDirectory, endpointsPrefix, endpointsTemplate, resourceTemplate } =
+        options
 
     const parser = new SwaggerParser()
     // let it throw
     const api = await parser.bundle(schema)
     const refs = parser.$refs
 
-    generateMarkdownFiles(api, refs, outputDirectory, endpointsPrefix)
+    generateMarkdownFiles({
+        api,
+        refs,
+        outputDirectory,
+        endpointsPrefix,
+        endpointsTemplate,
+        resourceTemplate,
+    })
 }
 
 // eslint-disable-next-line no-extra-semi
