@@ -35,11 +35,26 @@ async function main(): Promise<void> {
             '-r, --resource-schema-depth <resource-schema-depth>',
             'Resource schema parse depth. Defaults prefix to infinity',
         )
+        .option(
+            '-E, --endpoints-template <endpoints-template>',
+            'Endpoints template file. Defaults to ./endpoints.md',
+        )
+        .option(
+            '-R, --resource-template <resource-template>',
+            'Resource template file. Defaults to ./resource.md',
+        )
         .parse()
 
     const options = program.opts()
-    const { schema, outputDirectory, endpointsPrefix, endpointSchemaDepth, resourceSchemaDepth } =
-        options
+    const {
+        schema,
+        outputDirectory,
+        endpointsPrefix,
+        endpointSchemaDepth,
+        resourceSchemaDepth,
+        endpointsTemplate,
+        resourceTemplate,
+    } = options
 
     if (!validateNumber(endpointSchemaDepth, 'endpoint-schema-depth')) {
         return
@@ -53,14 +68,16 @@ async function main(): Promise<void> {
     const api = await parser.bundle(schema)
     const refs = parser.$refs
 
-    generateMarkdownFiles(
+    generateMarkdownFiles({
         api,
         refs,
         outputDirectory,
         endpointsPrefix,
-        resourceSchemaDepth ? parseInt(resourceSchemaDepth) : undefined,
-        endpointSchemaDepth ? parseInt(endpointSchemaDepth) : undefined,
-    )
+        resourceSchemaDepth: resourceSchemaDepth ? parseInt(resourceSchemaDepth) : undefined,
+        endpointSchemaDepth: endpointSchemaDepth ? parseInt(endpointSchemaDepth) : undefined,
+        endpointsTemplate,
+        resourceTemplate,
+    })
 }
 
 // eslint-disable-next-line no-extra-semi

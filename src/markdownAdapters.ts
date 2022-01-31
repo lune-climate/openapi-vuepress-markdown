@@ -155,13 +155,15 @@ function resolveExampleAdditionalProperties(
 function resolveRef(
     schemaOrRefObject: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
     refs: IRefs,
-): OpenAPIV3.SchemaObject {
+): OpenAPIV3.SchemaObject & { ref?: string } {
     const refObject = schemaOrRefObject as OpenAPIV3.ReferenceObject
     if (!refObject.$ref) {
         return deepcopy(schemaOrRefObject as OpenAPIV3.SchemaObject) // make a deepcopy for safety
     }
     const schemaObject = refs.get(refObject.$ref) as OpenAPIV3.SchemaObject
-    return deepcopy(schemaObject) // make a deep copy for safety
+
+    // keep reference in `ref` property if it has been resolved
+    return deepcopy({ ...schemaObject, ref: refObject.$ref }) // make a deep copy for safety
 }
 
 function resolveSchemaOrReferenceObject(
@@ -377,6 +379,10 @@ function generateEndpoint(
         (parameter) => parameter.in === 'path',
     )
 
+    const queryParameters = ((opObject.parameters ?? []) as OpenAPIV3.ParameterObject[]).filter(
+        (parameter) => parameter.in === 'query',
+    )
+
     return {
         method,
         path,
@@ -385,6 +391,7 @@ function generateEndpoint(
         tags: opObject.tags!,
         ...requestBodyObjects(opObject, refs, depth),
         ...(pathParameters ? { pathParameters } : {}),
+        ...(queryParameters ? { queryParameters } : {}),
         responses: responseObjects(opObject, refs, depth),
     }
 }
@@ -402,14 +409,25 @@ function generateResource(
     }
 }
 
-export function generateMarkdownFiles(
-    api: OpenAPIV3.Document,
-    refs: IRefs,
-    outputDirectory?: string,
-    endpointsPrefix?: string,
-    resourceSchemaDepth?: number,
-    endpointsSchemaDepth?: number,
-) {
+export function generateMarkdownFiles({
+    api,
+    refs,
+    outputDirectory,
+    endpointsPrefix,
+    endpointsTemplate,
+    resourceTemplate,
+    resourceSchemaDepth,
+    endpointSchemaDepth,
+}: {
+    api: OpenAPIV3.Document
+    refs: IRefs
+    outputDirectory?: string
+    endpointsPrefix?: string
+    endpointsTemplate?: string
+    resourceTemplate?: string
+    resourceSchemaDepth?: number
+    endpointSchemaDepth?: number
+}) {
     // resources
     const schemas = api.components?.schemas as Record<string, OpenAPIV3.SchemaObject> | undefined
     const resources = sortBy((name: string) => name, Object.keys(schemas ?? {})).map(
@@ -418,13 +436,20 @@ export function generateMarkdownFiles(
             return generateResource(name, schemaObject, refs, resourceSchemaDepth)
         },
     )
-    resources.map((resource: Resource) => generateResourceMarkdownFile(resource, outputDirectory))
+    resources.map((resource: Resource) =>
+        generateResourceMarkdownFile(resource, outputDirectory, resourceTemplate),
+    )
 
     // endpoints
-    const endpoints = generateEndpoints(api, refs, endpointsSchemaDepth)
+    const endpoints = generateEndpoints(api, refs, endpointSchemaDepth)
     const markdownTemplatesData = groupEndpointsByTag(api, endpoints)
     markdownTemplatesData.map((markdownTemplateData) =>
-        generateEndpointsMarkdownFile(markdownTemplateData, outputDirectory, endpointsPrefix),
+        generateEndpointsMarkdownFile(
+            markdownTemplateData,
+            outputDirectory,
+            endpointsPrefix,
+            endpointsTemplate,
+        ),
     )
 }
 
@@ -432,8 +457,10 @@ function generateEndpointsMarkdownFile(
     data: MarkdownTemplateData,
     outputDirectory?: string,
     endpointsPrefix?: string,
+    endpointsTemplate?: string,
 ) {
-    const templateContent = readFileSync(path.join(__dirname, '/../endpoints.md'))
+    const file = endpointsTemplate ?? path.join(__dirname, `/../endpoints.md`)
+    const templateContent = readFileSync(file)
     const template = Handlebars.compile(templateContent.toString())
 
     const result = template(data)
@@ -454,8 +481,13 @@ function generateEndpointsMarkdownFile(
     console.log(result)
 }
 
-function generateResourceMarkdownFile(resource: Resource, outputDirectory?: string) {
-    const templateContent = readFileSync(path.join(__dirname, '/../resource.md'))
+function generateResourceMarkdownFile(
+    resource: Resource,
+    outputDirectory?: string,
+    resourceTemplate?: string,
+) {
+    const file = resourceTemplate ?? path.join(__dirname, `/../resource.md`)
+    const templateContent = readFileSync(file)
     const template = Handlebars.compile(templateContent.toString())
 
     const result = template(resource)
