@@ -267,6 +267,7 @@ function buildExampleTree(
 function requestBodyObjects(
     opObject: OpenAPIV3.OperationObject,
     refs: IRefs,
+    depth: number | undefined = undefined,
 ): {
     requestBodySchema?: OpenAPIV3.SchemaObject
     requestBodyExample?: any
@@ -287,7 +288,7 @@ function requestBodyObjects(
     const schemaObject = object as OpenAPIV3.SchemaObject
 
     return {
-        requestBodySchema: resolveSchemaOrReferenceObject(schemaObject, refs, 2),
+        requestBodySchema: resolveSchemaOrReferenceObject(schemaObject, refs, depth),
         requestBodyExample: buildExampleTree(schemaObject, refs),
         requestBodyRef: refObject.$ref,
     }
@@ -297,6 +298,7 @@ function responseObject(
     opObject: OpenAPIV3.OperationObject,
     statusCode: string,
     refs: IRefs,
+    depth: number | undefined = undefined,
 ): ResponseSchema {
     const responseObject = opObject.responses[statusCode] as OpenAPIV3.ResponseObject
     const content = responseObject.content
@@ -315,7 +317,9 @@ function responseObject(
 
     return {
         description: responseObject.description,
-        schema: schemaObject ? resolveSchemaOrReferenceObject(schemaObject, refs, 2) : undefined,
+        schema: schemaObject
+            ? resolveSchemaOrReferenceObject(schemaObject, refs, depth)
+            : undefined,
         example: schemaObject ? buildExampleTree(schemaObject, refs) : undefined,
         ref: refObject.$ref,
     }
@@ -324,17 +328,22 @@ function responseObject(
 function responseObjects(
     opObject: OpenAPIV3.OperationObject,
     refs: IRefs,
+    depth: number | undefined = undefined,
 ): Record<string, ResponseSchema> {
     return Object.keys(opObject.responses).reduce(
         (prev: Record<string, ResponseSchema>, statusCode: string) => {
-            prev[statusCode] = responseObject(opObject, statusCode, refs)
+            prev[statusCode] = responseObject(opObject, statusCode, refs, depth)
             return prev
         },
         {},
     )
 }
 
-function generateEndpoints(api: OpenAPIV3.Document, refs: IRefs): Endpoint[] {
+function generateEndpoints(
+    api: OpenAPIV3.Document,
+    refs: IRefs,
+    depth: number | undefined = undefined,
+): Endpoint[] {
     return flatten(
         Object.keys(api.paths ?? {}).map((path: string): Endpoint[] => {
             const pathObject = api.paths![path] as OpenAPIV3.PathItemObject
@@ -345,7 +354,7 @@ function generateEndpoints(api: OpenAPIV3.Document, refs: IRefs): Endpoint[] {
                         return undefined
                     }
 
-                    return generateEndpoint(method, path, opObject, refs)
+                    return generateEndpoint(method, path, opObject, refs, depth)
                 },
             )
             return endpoints.filter(
@@ -360,6 +369,7 @@ function generateEndpoint(
     path: string,
     opObject: OpenAPIV3.OperationObject,
     refs: IRefs,
+    depth: number | undefined = undefined,
 ): Endpoint {
     if (opObject.tags === undefined) {
         throw new Error(`${opObject} must have a tag`)
@@ -379,10 +389,10 @@ function generateEndpoint(
         summary: opObject.summary,
         description: opObject.description,
         tags: opObject.tags!,
-        ...requestBodyObjects(opObject, refs),
+        ...requestBodyObjects(opObject, refs, depth),
         ...(pathParameters ? { pathParameters } : {}),
         ...(queryParameters ? { queryParameters } : {}),
-        responses: responseObjects(opObject, refs),
+        responses: responseObjects(opObject, refs, depth),
     }
 }
 
@@ -390,10 +400,11 @@ function generateResource(
     name: string,
     schemaObject: OpenAPIV3.SchemaObject,
     refs: IRefs,
+    depth: number | undefined = undefined,
 ): Resource {
     return {
         name,
-        ...resolveSchemaOrReferenceObject(schemaObject, refs, 2),
+        ...resolveSchemaOrReferenceObject(schemaObject, refs, depth),
         example: schemaObject ? buildExampleTree(schemaObject, refs) : undefined,
     }
 }
@@ -405,6 +416,8 @@ export function generateMarkdownFiles({
     endpointsPrefix,
     endpointsTemplate,
     resourceTemplate,
+    resourceSchemaDepth,
+    endpointSchemaDepth,
 }: {
     api: OpenAPIV3.Document
     refs: IRefs
@@ -412,13 +425,15 @@ export function generateMarkdownFiles({
     endpointsPrefix?: string
     endpointsTemplate?: string
     resourceTemplate?: string
+    resourceSchemaDepth?: number
+    endpointSchemaDepth?: number
 }) {
     // resources
     const schemas = api.components?.schemas as Record<string, OpenAPIV3.SchemaObject> | undefined
     const resources = sortBy((name: string) => name, Object.keys(schemas ?? {})).map(
         (name: string): Resource => {
             const schemaObject = schemas![name]
-            return generateResource(name, schemaObject, refs)
+            return generateResource(name, schemaObject, refs, resourceSchemaDepth)
         },
     )
     resources.map((resource: Resource) =>
@@ -426,7 +441,7 @@ export function generateMarkdownFiles({
     )
 
     // endpoints
-    const endpoints = generateEndpoints(api, refs)
+    const endpoints = generateEndpoints(api, refs, endpointSchemaDepth)
     const markdownTemplatesData = groupEndpointsByTag(api, endpoints)
     markdownTemplatesData.map((markdownTemplateData) =>
         generateEndpointsMarkdownFile(

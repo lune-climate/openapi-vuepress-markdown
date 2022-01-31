@@ -3,7 +3,17 @@
 import './handlebarHelpers'
 import { Command } from 'commander'
 import { generateMarkdownFiles } from './markdownAdapters'
+import validator from 'validator'
+
 const SwaggerParser = require('swagger-parser')
+
+function validateNumber(arg: string, name: string): boolean {
+    if (arg && !validator.isInt(arg)) {
+        console.log(`${name} must be a number, instead ${arg}`)
+        return false
+    }
+    return true
+}
 
 async function main(): Promise<void> {
     const program = new Command()
@@ -18,6 +28,14 @@ async function main(): Promise<void> {
             'Endpoint file prefix, to avoid filename conflicts with resources. Defaults to blank (no prefix)',
         )
         .option(
+            '-d, --endpoint-schema-depth <endpoint-schema-depth>',
+            'Endpoint schema parse depth. Defaults prefix to infinity',
+        )
+        .option(
+            '-r, --resource-schema-depth <resource-schema-depth>',
+            'Resource schema parse depth. Defaults prefix to infinity',
+        )
+        .option(
             '-E, --endpoints-template <endpoints-template>',
             'Endpoints template file. Defaults to ./endpoints.md',
         )
@@ -28,8 +46,22 @@ async function main(): Promise<void> {
         .parse()
 
     const options = program.opts()
-    const { schema, outputDirectory, endpointsPrefix, endpointsTemplate, resourceTemplate } =
-        options
+    const {
+        schema,
+        outputDirectory,
+        endpointsPrefix,
+        endpointSchemaDepth,
+        resourceSchemaDepth,
+        endpointsTemplate,
+        resourceTemplate,
+    } = options
+
+    if (!validateNumber(endpointSchemaDepth, 'endpoint-schema-depth')) {
+        return
+    }
+    if (!validateNumber(resourceSchemaDepth, 'resourcet-schema-depth')) {
+        return
+    }
 
     const parser = new SwaggerParser()
     // let it throw
@@ -41,6 +73,8 @@ async function main(): Promise<void> {
         refs,
         outputDirectory,
         endpointsPrefix,
+        resourceSchemaDepth: resourceSchemaDepth ? parseInt(resourceSchemaDepth) : undefined,
+        endpointSchemaDepth: endpointSchemaDepth ? parseInt(endpointSchemaDepth) : undefined,
         endpointsTemplate,
         resourceTemplate,
     })
