@@ -367,6 +367,10 @@ function generateEndpoint(
         (parameter) => parameter.in === 'path',
     )
 
+    const queryParameters = ((opObject.parameters ?? []) as OpenAPIV3.ParameterObject[]).filter(
+        (parameter) => parameter.in === 'query',
+    )
+
     return {
         method,
         path,
@@ -375,6 +379,7 @@ function generateEndpoint(
         tags: opObject.tags!,
         ...requestBodyObjects(opObject, refs),
         ...(pathParameters ? { pathParameters } : {}),
+        ...(queryParameters ? { queryParameters } : {}),
         responses: responseObjects(opObject, refs),
     }
 }
