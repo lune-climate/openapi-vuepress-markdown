@@ -28,11 +28,11 @@ async function main(): Promise<void> {
             'Endpoint file prefix, to avoid filename conflicts with resources. Defaults to blank (no prefix)',
         )
         .option(
-            '-ed, --endpoint-schema-depth <endpoint-schema-depth>',
+            '-d, --endpoint-schema-depth <endpoint-schema-depth>',
             'Endpoint schema parse depth. Defaults prefix to infinity',
         )
         .option(
-            '-rd, --resource-schema-depth <resource-schema-depth>',
+            '-r, --resource-schema-depth <resource-schema-depth>',
             'Resource schema parse depth. Defaults prefix to infinity',
         )
         .parse()
