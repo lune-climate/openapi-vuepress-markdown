@@ -3,10 +3,12 @@
 import './handlebarHelpers'
 import { Command } from 'commander'
 import { generateMarkdownFiles } from './markdownAdapters'
+import validator from 'validator'
+
 const SwaggerParser = require('swagger-parser')
 
 function validateNumber(arg: string, name: string): boolean {
-    if (arg && isNaN(Number(arg))) {
+    if (arg && !validator.isInt(arg)) {
         console.log(`${name} must be a number, instead ${arg}`)
         return false
     }
