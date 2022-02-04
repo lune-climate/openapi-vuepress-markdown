@@ -716,7 +716,6 @@ describe('markdownAdapters', () => {
                 0,
             )
 
-            console.log(schemaObject)
             expect(schemaObject).toEqual({
                 type: 'object',
                 properties: {
