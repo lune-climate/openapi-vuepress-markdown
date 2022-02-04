@@ -670,6 +670,74 @@ describe('markdownAdapters', () => {
                 },
             })
         })
+
+        test('should preserve top most refs', () => {
+            const refsMock = createIRefsMock()
+            refsMock.get.mockImplementation((ref: string) => {
+                switch (ref) {
+                    case '#/Something':
+                        return {
+                            allOf: [
+                                { $ref: '#/SomethingElse' },
+                                {
+                                    type: 'object',
+                                    properties: {
+                                        c: {
+                                            type: 'string',
+                                            example: 'bar',
+                                        },
+                                    },
+                                },
+                            ],
+                        }
+                    case '#/SomethingElse':
+                    default:
+                        return {
+                            type: 'object',
+                            properties: {
+                                d: {
+                                    type: 'string',
+                                    example: 'foo',
+                                },
+                            },
+                        }
+                }
+            })
+
+            const schemaObject = resolveSchemaOrReferenceObject(
+                {
+                    type: 'object',
+                    properties: {
+                        a: { $ref: '#/Something' },
+                    },
+                },
+                refsMock,
+                undefined,
+                0,
+            )
+
+            console.log(schemaObject)
+            expect(schemaObject).toEqual({
+                type: 'object',
+                properties: {
+                    a: {
+                        type: 'object',
+                        ref: '#/Something', // instead of '#/SomethingElse'
+                        required: [],
+                        properties: {
+                            d: {
+                                type: 'string',
+                                example: 'foo',
+                            },
+                            c: {
+                                type: 'string',
+                                example: 'bar',
+                            },
+                        },
+                    },
+                },
+            })
+        })
     })
 
     describe('requestBodyObjects', () => {
