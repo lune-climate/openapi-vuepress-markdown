@@ -66,6 +66,26 @@ function resolveAllOf(
     )
 }
 
+function resolveOneOf(
+    schemaObject: OpenAPIV3.SchemaObject,
+    refs: IRefs,
+    depth: number | undefined = undefined,
+    depthCounter: number = 0,
+): OpenAPIV3.SchemaObject {
+    if (!schemaObject.oneOf) {
+        return schemaObject
+    }
+
+    schemaObject.oneOf = schemaObject.oneOf.map(
+        (
+            childSchemaObject: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
+        ): OpenAPIV3.SchemaObject =>
+            resolveSchemaOrReferenceObject(childSchemaObject, refs, depth, depthCounter),
+    )
+
+    return schemaObject
+}
+
 function resolveExampleAllOf(
     schemaObject: OpenAPIV3.SchemaObject,
     refs: IRefs,
@@ -184,6 +204,11 @@ function resolveSchemaOrReferenceObject(
     // Resolve allOf
     if (resolvedSchemaObject.allOf) {
         return resolveAllOf(resolvedSchemaObject, refs, depth, depthCounter)
+    }
+
+    // Resolve oneOf
+    if (resolvedSchemaObject.oneOf) {
+        return resolveOneOf(resolvedSchemaObject, refs, depth, depthCounter)
     }
 
     // NOTE: oneOf, anyOf is currently not supported

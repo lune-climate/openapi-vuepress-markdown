@@ -56,6 +56,9 @@ Handlebars.registerHelper('refToResourceLink', (ref) => {
 })
 
 function refToResourceName(ref: string): string | undefined {
+    if (ref === undefined) {
+        return undefined
+    }
     const items = ref.split('/')
     if (!items) {
         return undefined
