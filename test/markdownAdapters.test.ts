@@ -671,7 +671,7 @@ describe('markdownAdapters', () => {
             })
         })
 
-        test('should preserve top most refs', () => {
+        test('should preserve topmost refs', () => {
             const refsMock = createIRefsMock()
             refsMock.get.mockImplementation((ref: string) => {
                 switch (ref) {
