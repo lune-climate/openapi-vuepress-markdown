@@ -670,6 +670,58 @@ describe('markdownAdapters', () => {
                 },
             })
         })
+
+        test('should preserve topmost refs', () => {
+            const refsMock = createIRefsMock()
+            refsMock.get.mockImplementation((ref: string) => {
+                switch (ref) {
+                    case '#/Something':
+                        return {
+                            allOf: [{ $ref: '#/SomethingElse' }],
+                        }
+                    case '#/SomethingElse':
+                    default:
+                        return {
+                            type: 'object',
+                            properties: {
+                                d: {
+                                    type: 'string',
+                                    example: 'foo',
+                                },
+                            },
+                        }
+                }
+            })
+
+            const schemaObject = resolveSchemaOrReferenceObject(
+                {
+                    type: 'object',
+                    properties: {
+                        a: { $ref: '#/Something' },
+                    },
+                },
+                refsMock,
+                undefined,
+                0,
+            )
+
+            expect(schemaObject).toEqual({
+                type: 'object',
+                properties: {
+                    a: {
+                        type: 'object',
+                        ref: '#/Something', // instead of '#/SomethingElse'
+                        required: [],
+                        properties: {
+                            d: {
+                                type: 'string',
+                                example: 'foo',
+                            },
+                        },
+                    },
+                },
+            })
+        })
     })
 
     describe('requestBodyObjects', () => {

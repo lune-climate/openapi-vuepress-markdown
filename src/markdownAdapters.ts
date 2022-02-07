@@ -29,8 +29,8 @@ function mergeSchemaObjects(...schemaObjects: OpenAPIV3.SchemaObject[]): OpenAPI
     return schemaObjects.reduce(
         (currSchemaObject, schemaObject: OpenAPIV3.SchemaObject): OpenAPIV3.SchemaObject => {
             return {
-                ...currSchemaObject,
                 ...schemaObject,
+                ...currSchemaObject, // add current state after current object: for allOf cases this preserves top level $ref names
                 properties: {
                     ...(currSchemaObject.properties ?? {}),
                     ...(schemaObject.properties ?? {}),
