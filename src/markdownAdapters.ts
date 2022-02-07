@@ -76,14 +76,15 @@ function resolveOneOf(
         return schemaObject
     }
 
-    schemaObject.oneOf = schemaObject.oneOf.map(
-        (
-            childSchemaObject: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
-        ): OpenAPIV3.SchemaObject =>
-            resolveSchemaOrReferenceObject(childSchemaObject, refs, depth, depthCounter),
-    )
-
-    return schemaObject
+    return {
+        ...schemaObject,
+        oneOf: schemaObject.oneOf.map(
+            (
+                childSchemaObject: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
+            ): OpenAPIV3.SchemaObject =>
+                resolveSchemaOrReferenceObject(childSchemaObject, refs, depth, depthCounter),
+        ),
+    }
 }
 
 function resolveExampleAllOf(
