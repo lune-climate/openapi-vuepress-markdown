@@ -55,7 +55,7 @@ Handlebars.registerHelper('refToResourceLink', (ref) => {
     return `${resourceLink}.html`
 })
 
-function refToResourceName(ref: string): string | undefined {
+function refToResourceName(ref: string | undefined): string | undefined {
     if (ref === undefined) {
         return undefined
     }
