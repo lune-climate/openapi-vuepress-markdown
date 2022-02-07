@@ -17,6 +17,12 @@ describe('markdownAdapters', () => {
         depth: number | undefined,
         depthCounter: number,
     ) => OpenAPIV3.SchemaObject
+    let resolveOneOf: (
+        schemaObject: OpenAPIV3.SchemaObject,
+        refs: IRefs,
+        depth: number | undefined,
+        depthCounter: number,
+    ) => OpenAPIV3.SchemaObject
     let resolveProperties: (
         properties: Properties | undefined,
         refs: IRefs,
@@ -43,6 +49,7 @@ describe('markdownAdapters', () => {
         // access non-exported functions
         mergeSchemaObjects = markdownAdapters.__get__('mergeSchemaObjects')
         resolveAllOf = markdownAdapters.__get__('resolveAllOf')
+        resolveOneOf = markdownAdapters.__get__('resolveOneOf')
         resolveProperties = markdownAdapters.__get__('resolveProperties')
         resolveSchemaOrReferenceObject = markdownAdapters.__get__('resolveSchemaOrReferenceObject')
         requestBodyObjects = markdownAdapters.__get__('requestBodyObjects')
@@ -103,6 +110,70 @@ describe('markdownAdapters', () => {
                 },
             },
             additionalProperties: { type: 'string' },
+        })
+    })
+
+    describe('resolveOneOf', () => {
+        test('should expand child objects when necessary', () => {
+            const refsMock = createIRefsMock()
+            refsMock.get.mockReturnValue({
+                type: 'object',
+                properties: {
+                    c: {
+                        type: 'string',
+                        example: 'bar',
+                    },
+                },
+            })
+
+            const schemaObject = resolveOneOf(
+                {
+                    oneOf: [
+                        { $ref: '#/Something' },
+                        {
+                            type: 'object',
+                            required: ['a'],
+                            properties: {
+                                a: {
+                                    type: 'string',
+                                    pattern: '^[0-9]+$',
+                                    example: '1045',
+                                },
+                            },
+                        },
+                    ],
+                },
+                refsMock,
+                undefined,
+                0,
+            )
+
+            expect(refsMock.get).toHaveBeenCalledWith('#/Something')
+            expect(schemaObject).toEqual({
+                oneOf: [
+                    {
+                        type: 'object',
+                        ref: '#/Something',
+                        properties: {
+                            c: {
+                                type: 'string',
+                                example: 'bar',
+                            },
+                        },
+                    },
+                    {
+                        type: 'object',
+                        required: ['a'],
+                        properties: {
+                            a: {
+                                type: 'string',
+                                pattern: '^[0-9]+$',
+                                example: '1045',
+                            },
+                        },
+                    },
+                ],
+            })
         })
     })
 
