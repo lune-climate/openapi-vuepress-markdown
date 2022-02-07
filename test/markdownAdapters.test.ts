@@ -677,18 +677,7 @@ describe('markdownAdapters', () => {
                 switch (ref) {
                     case '#/Something':
                         return {
-                            allOf: [
-                                { $ref: '#/SomethingElse' },
-                                {
-                                    type: 'object',
-                                    properties: {
-                                        c: {
-                                            type: 'string',
-                                            example: 'bar',
-                                        },
-                                    },
-                                },
-                            ],
+                            allOf: [{ $ref: '#/SomethingElse' }],
                         }
                     case '#/SomethingElse':
                     default:
@@ -727,10 +716,6 @@ describe('markdownAdapters', () => {
                             d: {
                                 type: 'string',
                                 example: 'foo',
-                            },
-                            c: {
-                                type: 'string',
-                                example: 'bar',
                             },
                         },
                     },
